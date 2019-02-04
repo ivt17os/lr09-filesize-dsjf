@@ -19,21 +19,29 @@ void dfs() {
  
     HANDLE hFind;                   	// номер поиска
     WIN32_FIND_DATA res;            	// результат поиска
- 
+
     hFind = FindFirstFile(L"*", &res);   // найти первый файл
  
     do {
-        count++; // некоторые файлы не считаются??
+		if (wcscmp(res.cFileName, L".")==0||
+			wcscmp(res.cFileName, L"..")==0)
+			continue;
+
         _tprintf(TEXT("file #%d is <%s>\n"), count, res.cFileName);
  
-        // if (...) { // если это подпапка
+        if ((res.dwFileAttributes&16)!=0 ) { // если это подпапка
         // 	здесь будет обход в глубину
-        // }
-        // else {// это файл
-        // size+=res....
-        // }
+			SetCurrentDirectory(res.cFileName);
+			dfs();
+			SetCurrentDirectory(L"..");
+        }
+        else {// это файл
+        size+=res.nFileSizeLow;
+		count++; // некоторые файлы не считаются??
+        }
     } while (FindNextFile(hFind, &res) != 0);
     FindClose(hFind);
+	//SetCurrentDirectory(L".."); //неправильно стоит
 }
  
 int main(int argc, wchar_t* argv[]) {
